@@ -263,9 +263,12 @@ class _FlowSendBottomNav extends StatelessWidget {
                   height: 60,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0x99262A34)
+                      ? const Color(0x4D262A34)
                         : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
+                    border: isSelected
+                      ? const Border(top: BorderSide(color: Color(0xFFA5E7FF), width: 2))
+                      : null,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

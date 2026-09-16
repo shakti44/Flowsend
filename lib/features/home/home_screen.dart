@@ -58,8 +58,8 @@ class _HomeScreenState extends State<HomeScreen>
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // Keep the atmosphere quiet so the send action stays dominant.
-          const _AmbientGlows(),
+          // Keep the background intentionally quiet so the send action leads.
+          const SizedBox.expand(),
 
           CustomScrollView(
             slivers: [
@@ -74,11 +74,11 @@ class _HomeScreenState extends State<HomeScreen>
                   delegate: SliverChildListDelegate([
                     // Hero canvas
                     _buildHeroSection(context),
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.sm),
 
                     // Security verification pill
                     _buildSecurityPill(),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
 
                     // Recent transfers
                     _buildRecentTransfers(context),
@@ -128,13 +128,6 @@ class _HomeScreenState extends State<HomeScreen>
                   height: 1.05,
                 ),
               ),
-              Text(
-                'HOME',
-                style: AppTypography.labelSm.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  letterSpacing: 1.4,
-                ),
-              ),
             ],
           ),
           const Spacer(),
@@ -164,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildHeroSection(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.md),
 
         // Tagline badge
         Container(
@@ -173,9 +166,8 @@ class _HomeScreenState extends State<HomeScreen>
             vertical: AppSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh.withValues(alpha: 0.72),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.45)),
+            color: AppColors.surfaceContainerHigh.withValues(alpha: 0.42),
+          borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -186,23 +178,23 @@ class _HomeScreenState extends State<HomeScreen>
                 'MOVE ANYTHING. ANYWHERE.',
                 style: AppTypography.labelSm.copyWith(
                   color: AppColors.onSurfaceVariant,
-                  letterSpacing: 1.2,
+                  letterSpacing: 0.8,
                 ),
               ),
             ],
           ),
         ),
 
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.xs),
 
-        // Radar orb
+        // Compact brand visual
         _buildRadarOrb(),
 
         const SizedBox(height: AppSpacing.md),
 
         // Headline
         Text(
-          'Send with confidence.',
+          'Ready to send?',
           style: AppTypography.headlineXlMobile.copyWith(
             color: AppColors.onSurface,
           ),
@@ -212,21 +204,21 @@ class _HomeScreenState extends State<HomeScreen>
         const SizedBox(height: AppSpacing.xs),
 
         Text(
-          'Move files directly to a nearby device,\nwithout the clutter.',
+          'Choose files and we\'ll handle the rest.',
           style: AppTypography.bodyMd.copyWith(
             color: AppColors.onSurfaceVariant,
           ),
           textAlign: TextAlign.center,
         ),
 
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
 
         // Primary CTA: + Send Files
         PrimaryPillButton(
           label: '+ Send Files',
           icon: Icons.add_circle_outline,
           onPressed: () => context.push(AppRoutes.selectFiles),
-          height: 58,
+          height: 56,
         ),
 
         const SizedBox(height: AppSpacing.sm),
@@ -258,71 +250,42 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildRadarOrb() {
-    final size = MediaQuery.sizeOf(context).width < 380 ? 144.0 : 156.0;
+    final size = MediaQuery.sizeOf(context).width < 380 ? 96.0 : 108.0;
     return SizedBox(
       width: size,
       height: size,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Ping ring
           AnimatedBuilder(
             animation: _pingAnim,
             builder: (_, __) {
               return Opacity(
-                opacity: (1 - _pingAnim.value) * 0.25,
+                opacity: (1 - _pingAnim.value) * 0.16,
                 child: Transform.scale(
-                  scale: 0.7 + _pingAnim.value * 0.3,
+                  scale: 0.86 + _pingAnim.value * 0.14,
                   child: Container(
                     width: size,
                     height: size,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.surfaceContainerHigh.withValues(alpha: 0.3),
+                      border: Border.all(color: AppColors.secondary.withValues(alpha: 0.7), width: 1),
                     ),
                   ),
                 ),
               );
             },
           ),
-
-          // Mid ring
           Container(
-            width: size - 16,
-            height: size - 16,
+            width: size - 14,
+            height: size - 14,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.surfaceContainerLow.withValues(alpha: 0.40),
+              color: AppColors.surfaceContainerLow,
+              border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
             ),
           ),
-
-          // Inner ring
-          Container(
-            width: size - 38,
-            height: size - 38,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surfaceContainer.withValues(alpha: 0.60),
-              boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 12),
-              ],
-            ),
-          ),
-
-          // Logo orb at center
-          FlowSendLogoOrb(size: size * 0.54),
-
-          // Orbital pips
-          const Positioned(
-            top: 6,
-            right: 18,
-            child: _GlowPip(color: AppColors.secondaryContainer, size: 12),
-          ),
-          const Positioned(
-            bottom: 12,
-            left: 18,
-            child: _GlowPip(color: AppColors.primary, size: 10),
-          ),
+          const FlowSendLogoOrb(size: 68),
         ],
       ),
     );
@@ -330,43 +293,23 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildSecurityPill() {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
+        color: AppColors.surfaceContainerLow.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surfaceContainer,
-            ),
-            child: const Icon(Icons.verified_user, color: AppColors.secondary, size: 16),
-          ),
-          const SizedBox(width: AppSpacing.xs),
+          const Icon(Icons.shield_outlined, color: AppColors.secondary, size: 18),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Protected transfer',
-                  style: AppTypography.labelSm.copyWith(
-                    color: AppColors.onSurface,
-                  ),
-                ),
-                Text(
-                  'SHA-256 verification enabled',
-                  style: AppTypography.bodySm.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-              ],
+            child: Text(
+              'Direct & protected',
+              style: AppTypography.labelMd.copyWith(color: AppColors.onSurface),
             ),
           ),
+          Text('SHA-256 verified', style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant)),
+          const SizedBox(width: AppSpacing.sm),
           const SecurityPill(isActive: true),
         ],
       ),
@@ -439,42 +382,6 @@ class _HomeScreenState extends State<HomeScreen>
 
 // ─── Supporting Widgets ──────────────────────────────────────────────────────
 
-class _AmbientGlows extends StatelessWidget {
-  const _AmbientGlows();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: -40,
-          left: MediaQuery.of(context).size.width / 2 - 96,
-          child: Container(
-            width: 192,
-            height: 192,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primaryContainer.withValues(alpha: 0.10),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 228,
-          left: MediaQuery.of(context).size.width / 3 - 64,
-          child: Container(
-            width: 128,
-            height: 128,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.secondaryContainer.withValues(alpha: 0.08),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _PulsingDot extends StatefulWidget {
   const _PulsingDot({required this.color});
   final Color color;
@@ -515,30 +422,6 @@ class _PulsingDotState extends State<_PulsingDot>
           shape: BoxShape.circle,
           color: widget.color.withValues(alpha: _a.value),
         ),
-      ),
-    );
-  }
-}
-
-class _GlowPip extends StatelessWidget {
-  const _GlowPip({required this.color, required this.size});
-  final Color color;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.8),
-            blurRadius: 10,
-          ),
-        ],
       ),
     );
   }
@@ -655,24 +538,22 @@ class _RecentTransferCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surfaceContainerHigh,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.secondaryContainer.withValues(alpha: 0.25),
-                  blurRadius: 12,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                item.isSuccess ? Icons.check_circle_outline : Icons.error_outline,
+                size: 16,
+                color: item.isSuccess ? AppColors.secondary : AppColors.error,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                item.isSuccess ? 'Completed' : 'Failed',
+                style: AppTypography.labelSm.copyWith(
+                  color: item.isSuccess ? AppColors.secondary : AppColors.error,
                 ),
-              ],
-            ),
-            child: Icon(
-              item.isSuccess ? Icons.check : Icons.error_outline,
-              size: 16,
-              color: item.isSuccess ? AppColors.secondary : AppColors.error,
-            ),
+              ),
+            ],
           ),
         ],
       ),

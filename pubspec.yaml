@@ -1,0 +1,65 @@
+name: flowsend
+description: "FlowSend — Move anything. Anywhere. Premium cross-platform file-transfer."
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Navigation
+  go_router: ^14.6.3
+
+  # File picking (real device files)
+  file_picker: ^8.1.7
+
+  # Runtime permissions
+  permission_handler: ^11.3.1
+
+  # SVG rendering (FlowSend logo)
+  flutter_svg: ^2.0.14
+
+  # State management
+  provider: ^6.1.2
+
+  # Local persistence (history, settings)
+  shared_preferences: ^2.3.3
+
+  # Path utilities
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+  # Google Fonts (Plus Jakarta Sans + Inter)
+  google_fonts: ^6.2.1
+
+  # Internationalization (size/date formatting)
+  intl: ^0.20.1
+
+  # Crypto (SHA-256 file integrity)
+  crypto: ^3.0.6
+
+  # QR code generation
+  qr_flutter: ^4.1.0
+
+  # UUID for session IDs
+  uuid: ^4.5.1
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  mocktail: ^1.0.4
+
+dependency_overrides:
+  flutter_plugin_android_lifecycle: 2.0.22
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

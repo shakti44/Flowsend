@@ -135,14 +135,14 @@ class _ActiveTransferScreenState extends State<ActiveTransferScreen> {
         icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: AppColors.onSurface),
         onPressed: _cancelTransfer,
       ),
-      title: Text('Transfer Session',
+        title: Text('Sending to ${widget.device.name}',
           style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
       actions: [
         Container(
           width: 32, height: 32,
           margin: const EdgeInsets.only(right: AppSpacing.md),
-          decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primary),
-          child: const Icon(Icons.person, size: 18, color: AppColors.onPrimary),
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.surfaceContainerHigh),
+          child: const Icon(Icons.person, size: 18, color: AppColors.secondary),
         ),
       ],
     );
@@ -162,32 +162,6 @@ class _ActiveTransferScreenState extends State<ActiveTransferScreen> {
 
     return Stack(
       children: [
-        // Background glows
-        Positioned(
-          top: 48, left: 0, right: 0,
-          child: Center(
-            child: Container(
-              width: 256, height: 256,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primaryContainer.withValues(alpha: 0.20),
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 112, left: 0, right: 0,
-          child: Center(
-            child: Container(
-              width: 192, height: 192,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.secondaryContainer.withValues(alpha: 0.25),
-              ),
-            ),
-          ),
-        ),
-
         SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -200,7 +174,7 @@ class _ActiveTransferScreenState extends State<ActiveTransferScreen> {
                 const SizedBox(height: AppSpacing.sm),
                 TransferRing(
                   progress: progress,
-                  size: 256,
+                  size: 224,
                   centerChild: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -294,8 +268,9 @@ class _ActiveTransferScreenState extends State<ActiveTransferScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(AppSpacing.full),
+            color: AppColors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -318,21 +293,21 @@ class _ActiveTransferScreenState extends State<ActiveTransferScreen> {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Sending to ${widget.device.name}',
-          style: AppTypography.headlineLgMobile.copyWith(color: AppColors.onSurface),
+          'Transfer in progress',
+          style: AppTypography.headlineLgMobile.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w700),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 2),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Wi-Fi 6 Direct', style: AppTypography.labelSm.copyWith(color: AppColors.outline)),
+            Text(widget.device.name, style: AppTypography.labelSm.copyWith(color: AppColors.outline)),
             Container(
               width: 4, height: 4,
               margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.outlineVariant),
             ),
-            Text('End-to-End Encrypted', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
+            Text('Direct & protected', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
           ],
         ),
       ],

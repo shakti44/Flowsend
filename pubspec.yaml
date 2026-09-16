@@ -47,6 +47,9 @@ dependencies:
   # UUID for session IDs
   uuid: ^4.5.1
 
+  # External privacy/support links
+  url_launcher: ^6.3.1
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:

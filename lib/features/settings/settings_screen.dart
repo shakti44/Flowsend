@@ -90,6 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _SettingsSection(
             title: 'SECURITY',
             items: [
+              _SettingsItem(icon: Icons.shield_outlined, label: 'Privacy & Security', value: 'Review', onTap: () => context.push('/privacy-security')),
               _SettingsItem(icon: Icons.lock_outline, label: 'Encryption', value: 'LAN + SHA-256', onTap: _showEncryptionInfo),
               _SettingsItem(icon: Icons.devices, label: 'Trusted Devices', value: '0', onTap: () => context.push('/devices')),
               _SettingsItem(icon: Icons.qr_code, label: 'QR Code Timeout', value: _qrTimeout, onTap: () => _choose('QR Code Timeout', ['1h', '6h', '24h'], _qrTimeout, (value) => _qrTimeout = value)),

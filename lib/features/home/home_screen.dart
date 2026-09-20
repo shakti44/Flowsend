@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(width: AppSpacing.sm),
             Expanded(child: _QuickAction(icon: Icons.collections_outlined, label: 'Collect', onTap: () => context.push(AppRoutes.collect))),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: _QuickAction(icon: Icons.phone_android_outlined, label: 'New Phone', onTap: () => context.push(AppRoutes.selectFiles))),
+            Expanded(child: _QuickAction(icon: Icons.phone_android_outlined, label: 'New Phone', onTap: () => context.push(AppRoutes.newPhone))),
           ],
         ),
       ],

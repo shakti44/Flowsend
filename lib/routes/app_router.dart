@@ -18,6 +18,7 @@ import '../features/history/transfer_history_screen.dart';
 import '../features/devices/trusted_devices_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/settings/privacy_security_screen.dart';
+import '../features/new_phone/new_phone_screen.dart';
 import '../features/collect/collect_screen.dart';
 
 /// Named route path constants — use these throughout the app.
@@ -38,6 +39,7 @@ abstract final class AppRoutes {
   static const settings = '/settings';
   static const privacySecurity = '/privacy-security';
   static const collect = '/collect';
+  static const newPhone = '/new-phone';
 }
 
 /// Application router — main navigation shell with bottom tabs.
@@ -92,11 +94,24 @@ final appRouter = GoRouter(
       builder: (context, state) => const CollectScreen(),
     ),
 
+    GoRoute(
+      path: AppRoutes.newPhone,
+      name: 'new-phone',
+      builder: (context, state) => const NewPhoneScreen(),
+    ),
+
     // Transfer flow — full-page routes outside shell
     GoRoute(
       path: AppRoutes.selectFiles,
       name: 'select-files',
-      builder: (context, state) => const FileSelectionScreen(),
+      builder: (context, state) {
+        final extra = state.extra;
+        return FileSelectionScreen(
+          initialCategory: extra is Map<String, dynamic>
+              ? extra['category'] as FileSelectionCategory?
+              : null,
+        );
+      },
     ),
 
     GoRoute(

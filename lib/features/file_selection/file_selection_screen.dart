@@ -13,7 +13,9 @@ import '../../routes/app_router.dart';
 /// File Selection Screen — matches Stitch select_files design.
 /// Filter chips, file queue cards, total size bar, Continue CTA.
 class FileSelectionScreen extends StatefulWidget {
-  const FileSelectionScreen({super.key});
+  const FileSelectionScreen({super.key, this.initialCategory});
+
+  final FileSelectionCategory? initialCategory;
 
   @override
   State<FileSelectionScreen> createState() => _FileSelectionScreenState();
@@ -22,12 +24,13 @@ class FileSelectionScreen extends StatefulWidget {
 class _FileSelectionScreenState extends State<FileSelectionScreen> {
   final FileService _fileService = const FilePickerService();
   final List<SelectedFile> _selectedFiles = [];
-  _FileCategory _activeCategory = _FileCategory.photos;
+  late FileSelectionCategory _activeCategory;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _activeCategory = widget.initialCategory ?? FileSelectionCategory.photos;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _openInitialPicker();
     });
@@ -36,27 +39,27 @@ class _FileSelectionScreenState extends State<FileSelectionScreen> {
   Future<void> _openInitialPicker() async {
     // Let the route finish its first frame before launching DocumentsUI.
     await Future<void>.delayed(const Duration(milliseconds: 350));
-    if (mounted) await _pickFiles(_FileCategory.files);
+    if (mounted) await _pickFiles(widget.initialCategory ?? FileSelectionCategory.files);
   }
 
   int get _totalBytes =>
       _selectedFiles.fold(0, (sum, f) => sum + f.sizeBytes);
 
-  Future<void> _pickFiles(_FileCategory category) async {
+  Future<void> _pickFiles(FileSelectionCategory category) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
     try {
       List<SelectedFile> picked;
       switch (category) {
-        case _FileCategory.photos:
+        case FileSelectionCategory.photos:
           picked = await _fileService.pickPhotos();
-        case _FileCategory.videos:
+        case FileSelectionCategory.videos:
           picked = await _fileService.pickVideos();
-        case _FileCategory.documents:
+        case FileSelectionCategory.documents:
           picked = await _fileService.pickDocuments();
-        case _FileCategory.files:
+        case FileSelectionCategory.files:
           picked = await _fileService.pickFiles();
-        case _FileCategory.folders:
+        case FileSelectionCategory.folders:
           picked = await _fileService.pickDirectory();
       }
       if (!mounted) return;
@@ -193,7 +196,7 @@ class _FileSelectionScreenState extends State<FileSelectionScreen> {
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        children: _FileCategory.values.map((cat) {
+        children: FileSelectionCategory.values.map((cat) {
           final isActive = cat == _activeCategory;
           return Padding(
             padding: const EdgeInsets.only(right: AppSpacing.xs),
@@ -508,14 +511,14 @@ class _FileSelectionScreenState extends State<FileSelectionScreen> {
   }
 }
 
-enum _FileCategory {
+enum FileSelectionCategory {
   photos(Icons.photo_library, 'Photos'),
   videos(Icons.videocam_outlined, 'Videos'),
   documents(Icons.description_outlined, 'Documents'),
   files(Icons.insert_drive_file_outlined, 'Files'),
   folders(Icons.inventory_2_outlined, 'Folders');
 
-  const _FileCategory(this.icon, this.label);
+  const FileSelectionCategory(this.icon, this.label);
   final IconData icon;
   final String label;
 }

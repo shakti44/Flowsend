@@ -7,6 +7,7 @@ enum FlowAssistantIntentType {
   moveToNewPhone,
   collectMode,
   showTransfers,
+  showNearbyDevices,
   unsupported,
 }
 

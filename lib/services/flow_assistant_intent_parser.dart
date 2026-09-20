@@ -13,6 +13,11 @@ class FlowAssistantIntentParser {
     if (text.contains('recent transfers') || text.contains('failed transfers') || text.contains('transfer history')) {
       return FlowAssistantIntent(type: FlowAssistantIntentType.showTransfers, rawText: input);
     }
+    if ((text.contains('nearby') || text.contains('near by')) &&
+        (text.contains('device') || text.contains('phone') || text.contains('laptop')) ||
+        text.contains('search devices') || text.contains('find devices')) {
+      return FlowAssistantIntent(type: FlowAssistantIntentType.showNearbyDevices, rawText: input);
+    }
     if (text.contains('new phone') || text.contains('missing files')) {
       return FlowAssistantIntent(type: FlowAssistantIntentType.moveToNewPhone, rawText: input);
     }

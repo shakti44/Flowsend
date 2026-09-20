@@ -100,6 +100,8 @@ class _FlowAssistantSheetState extends State<FlowAssistantSheet> {
         context.push(AppRoutes.collect);
       case FlowAssistantIntentType.showTransfers:
         context.push(AppRoutes.history);
+      case FlowAssistantIntentType.showNearbyDevices:
+        context.push(AppRoutes.devices);
       case FlowAssistantIntentType.sendFiles ||
             FlowAssistantIntentType.sendRecentPhotos ||
             FlowAssistantIntentType.sendFileType ||
@@ -123,6 +125,7 @@ class _FlowAssistantSheetState extends State<FlowAssistantSheet> {
     if (intent == null) return '';
     if (intent.type == FlowAssistantIntentType.collectMode) return 'Open a collection for nearby contributors';
     if (intent.type == FlowAssistantIntentType.showTransfers) return 'Show recent FlowSend transfers';
+    if (intent.type == FlowAssistantIntentType.showNearbyDevices) return 'Open nearby devices';
     if (intent.deviceName != null && intent.deviceName!.isNotEmpty) return 'Prepare files for ${intent.deviceName}';
     if (intent.fileType != null) return 'Prepare ${intent.fileType} files for transfer';
     if (intent.type == FlowAssistantIntentType.sendRecentPhotos) return 'Prepare recent photos for transfer';
@@ -182,6 +185,20 @@ class _FlowAssistantSheetState extends State<FlowAssistantSheet> {
             if (_recognizedText.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
               Text('Recognized: "$_recognizedText"', style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant)),
+            ],
+            if (_intent?.type == FlowAssistantIntentType.unsupported) ...[
+              const SizedBox(height: AppSpacing.md),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'I can help you send, receive, find and manage FlowSend transfers.',
+                  style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                ),
+              ),
             ],
             if (hasIntent) ...[
               const SizedBox(height: AppSpacing.md),

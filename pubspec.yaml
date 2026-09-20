@@ -50,6 +50,9 @@ dependencies:
   # External privacy/support links
   url_launcher: ^6.3.1
 
+  # Contextual voice commands for Flow Assistant
+  speech_to_text: ^7.3.0
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:

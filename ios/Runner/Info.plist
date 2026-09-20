@@ -8,6 +8,8 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>FlowSend</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>FlowSend uses the microphone only when you tap Flow Assistant to understand your command.</string>
 
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>

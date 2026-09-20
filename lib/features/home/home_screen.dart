@@ -11,6 +11,7 @@ import '../../widgets/flowsend_logo.dart';
 import '../../widgets/primary_pill_button.dart';
 import '../../widgets/device_chip.dart';
 import '../../routes/app_router.dart';
+import 'flow_assistant_sheet.dart';
 
 /// FlowSend Home Screen — matches the Stitch flowsend_home design exactly.
 /// Features: radar orb, Send Files CTA, Receive + My Devices grid,
@@ -131,6 +132,22 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
           const Spacer(),
+          IconButton(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: AppColors.surfaceContainerHigh,
+              builder: (_) => const FlowAssistantSheet(),
+            ),
+            tooltip: 'Flow Assistant',
+            icon: const Icon(Icons.mic_none, size: 20),
+            style: IconButton.styleFrom(
+              foregroundColor: AppColors.secondary,
+              backgroundColor: AppColors.surfaceContainerLow,
+              shape: const CircleBorder(),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
           IconButton(
             onPressed: () => context.push(AppRoutes.settings),
             icon: const Icon(Icons.tune, size: 20),

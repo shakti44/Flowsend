@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Expanded(child: _QuickAction(icon: Icons.download_outlined, label: 'Receive', onTap: () => context.push(AppRoutes.receive))),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: _QuickAction(icon: Icons.collections_outlined, label: 'Collect', onTap: () => context.push(AppRoutes.collect))),
+            Expanded(child: _QuickAction(icon: Icons.collections_outlined, label: 'Event Rescue', onTap: () => context.push(AppRoutes.eventRescue))),
             const SizedBox(width: AppSpacing.sm),
             Expanded(child: _QuickAction(icon: Icons.phone_android_outlined, label: 'New Phone', onTap: () => context.push(AppRoutes.newPhone))),
           ],

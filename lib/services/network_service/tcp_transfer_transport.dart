@@ -158,9 +158,10 @@ class TcpTransferTransport implements TransferTransport {
 
 /// Receives FlowSend TCP sessions and verifies every completed file.
 class TcpTransferReceiver {
-  TcpTransferReceiver({this.outputDirectory});
+  TcpTransferReceiver({this.outputDirectory, this.avoidOverwrites = false});
 
   Directory? outputDirectory;
+  final bool avoidOverwrites;
   ServerSocket? _server;
   final _progressController = StreamController<IncomingTransferProgress>.broadcast();
 
@@ -206,7 +207,7 @@ class TcpTransferReceiver {
             .take(fileIndex)
             .fold<int>(0, (sum, previous) => sum + previous['size'] as int));
         var fileTransferred = fileOffset;
-        final path = '${destination.path}${Platform.pathSeparator}${file['name']}';
+        final path = await _nextAvailablePath(destination, file['name'] as String);
         receivedPaths.add(path);
         final output = File(path).openWrite(mode: skipped > 0 ? FileMode.append : FileMode.writeOnly);
         var remaining = size;
@@ -259,6 +260,20 @@ class TcpTransferReceiver {
       // The sender receives the socket failure and can retry/resume.
     } finally {
       await socket.close();
+    }
+  }
+
+  Future<String> _nextAvailablePath(Directory destination, String name) async {
+    final separator = Platform.pathSeparator;
+    final original = '${destination.path}$separator$name';
+    if (!avoidOverwrites || !await File(original).exists()) return original;
+    final extension = name.contains('.') ? '.${name.split('.').last}' : '';
+    final stem = extension.isEmpty ? name : name.substring(0, name.length - extension.length);
+    var index = 1;
+    while (true) {
+      final candidate = '${destination.path}$separator$stem ($index)$extension';
+      if (!await File(candidate).exists()) return candidate;
+      index++;
     }
   }
 

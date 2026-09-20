@@ -22,6 +22,9 @@ import '../features/new_phone/new_phone_screen.dart';
 import '../features/new_phone/new_phone_ready_screen.dart';
 import '../features/new_phone/new_phone_scan_screen.dart';
 import '../features/new_phone/new_phone_content_screen.dart';
+import '../features/event_rescue/event_rescue_screen.dart';
+import '../features/event_rescue/event_join_scan_screen.dart';
+import '../features/event_rescue/event_contribution_screen.dart';
 import '../features/collect/collect_screen.dart';
 
 /// Named route path constants — use these throughout the app.
@@ -46,6 +49,9 @@ abstract final class AppRoutes {
   static const newPhoneReady = '/new-phone-ready';
   static const newPhoneScan = '/new-phone-scan';
   static const newPhoneContent = '/new-phone-content';
+  static const eventRescue = '/event-rescue';
+  static const eventJoinScan = '/event-join-scan';
+  static const eventContribution = '/event-contribution';
 }
 
 /// Application router — main navigation shell with bottom tabs.
@@ -122,6 +128,9 @@ final appRouter = GoRouter(
         targetDevice: state.extra as DiscoveredDevice,
       ),
     ),
+    GoRoute(path: AppRoutes.eventRescue, name: 'event-rescue', builder: (context, state) => const EventRescueScreen()),
+    GoRoute(path: AppRoutes.eventJoinScan, name: 'event-join-scan', builder: (context, state) => const EventJoinScanScreen()),
+    GoRoute(path: AppRoutes.eventContribution, name: 'event-contribution', builder: (context, state) => EventContributionScreen(targetDevice: state.extra as DiscoveredDevice)),
 
     // Transfer flow — full-page routes outside shell
     GoRoute(

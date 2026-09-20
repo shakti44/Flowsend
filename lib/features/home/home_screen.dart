@@ -215,7 +215,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildOrbitalShortcut(int index) {
     final shortcut = _orbitalShortcuts[index];
-    final angle = _pulseController.value * math.pi * 2 + index * math.pi * 2 / _orbitalShortcuts.length;
+    // Keep shortcuts spatially stable; only the orb/rings breathe underneath.
+    final angle = index * math.pi * 2 / _orbitalShortcuts.length - math.pi / 2;
     const radius = 86.0;
     return Transform.translate(
       offset: Offset(math.cos(angle) * radius, math.sin(angle) * radius),

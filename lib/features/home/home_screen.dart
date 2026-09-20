@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen>
             tooltip: 'Flow Assistant',
             onPressed: _openAssistant,
             icon: const Icon(Icons.mic_none, size: 21),
-            style: IconButton.styleFrom(foregroundColor: AppColors.secondary, backgroundColor: AppColors.surfaceContainerLow, shape: const CircleBorder()),
+            style: IconButton.styleFrom(foregroundColor: AppColors.secondary, backgroundColor: AppColors.surfaceContainerLow, shape: const CircleBorder(), elevation: 4, shadowColor: AppColors.secondary.withValues(alpha: 0.25)),
           ),
           const SizedBox(width: AppSpacing.xs),
           IconButton(
@@ -156,6 +156,10 @@ class _HomeScreenState extends State<HomeScreen>
         child: Stack(
           alignment: Alignment.center,
           children: [
+            if (_devices.isEmpty) ...[
+              _RadarRing(progress: _pulseController.value, size: 154),
+              _RadarRing(progress: (_pulseController.value + 0.5) % 1, size: 132),
+            ],
             Container(width: 154, height: 154, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.secondary.withValues(alpha: 0.14 + _pulseController.value * 0.14), width: 1))),
             Container(width: 126, height: 126, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surfaceContainerLow, border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.55)), boxShadow: [BoxShadow(color: AppColors.primaryContainer.withValues(alpha: 0.13), blurRadius: 28, spreadRadius: 2)])),
             const FlowSendLogoOrb(size: 82),
@@ -194,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [Text('Recent', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w700)), const Spacer(), TextButton(onPressed: () => context.push(AppRoutes.history), child: const Text('See all'))]),
       const SizedBox(height: AppSpacing.sm),
-      if (_recentTransfers.isEmpty) Text('No transfers yet', style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant)) else ..._recentTransfers.map((record) => _RecentTransferRow(record: record)),
+      if (_recentTransfers.isEmpty) Text('No transfers yet', style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant)) else ..._recentTransfers.asMap().entries.map((entry) => _RecentTransferRow(record: entry.value, delay: entry.key * 90)),
     ]);
   }
 }
@@ -211,13 +215,91 @@ class _QuickAction extends StatelessWidget {
 class _DevicePreview extends StatelessWidget {
   const _DevicePreview({required this.device});
   final DiscoveredDevice device;
+
   @override
-  Widget build(BuildContext context) => Container(width: 116, padding: const EdgeInsets.all(AppSpacing.sm), decoration: BoxDecoration(color: AppColors.surfaceContainerLow, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.45))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [DevicePlatformIcon(platform: device.platform, size: 22, color: AppColors.secondary), const Spacer(), Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.securityGreen))]), const Spacer(), Text(device.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.labelMd.copyWith(color: AppColors.onSurface)), Text('Ready', style: AppTypography.bodySm.copyWith(color: AppColors.securityGreen))]));
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+        key: ValueKey(device.id),
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+        builder: (context, value, child) => Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(12 * (1 - value), 0),
+            child: child,
+          ),
+        ),
+        child: Container(
+          width: 116,
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.45)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  DevicePlatformIcon(platform: device.platform, size: 22, color: AppColors.secondary),
+                  const Spacer(),
+                  Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.securityGreen)),
+                ],
+              ),
+              const Spacer(),
+              Text(device.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.labelMd.copyWith(color: AppColors.onSurface)),
+              Text('Ready', style: AppTypography.bodySm.copyWith(color: AppColors.securityGreen)),
+            ],
+          ),
+        ),
+      );
+  }
 }
 
 class _RecentTransferRow extends StatelessWidget {
-  const _RecentTransferRow({required this.record});
+  const _RecentTransferRow({required this.record, required this.delay});
   final TransferRecord record;
+  final int delay;
+
   @override
-  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(bottom: AppSpacing.sm), child: Row(children: [Container(width: 42, height: 42, decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: BorderRadius.circular(10)), child: Icon(record.fileCount > 1 ? Icons.folder_zip_outlined : Icons.insert_drive_file_outlined, color: AppColors.secondary)), const SizedBox(width: AppSpacing.sm), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(record.fileName, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.labelMd.copyWith(color: AppColors.onSurface)), Text('${record.peerDevice.name} · ${FileSizeFormatter.format(record.totalSizeBytes)} · ${TimeFormatter.formatRelative(record.completedAt)}', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant))])), Icon(record.isSuccess ? Icons.check_circle_outline : Icons.error_outline, size: 18, color: record.isSuccess ? AppColors.securityGreen : AppColors.error)]));
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 260 + delay),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(offset: Offset(0, 8 * (1 - value)), child: child),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: Row(
+          children: [
+            Container(width: 42, height: 42, decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: BorderRadius.circular(10)), child: Icon(record.fileCount > 1 ? Icons.folder_zip_outlined : Icons.insert_drive_file_outlined, color: AppColors.secondary)),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(record.fileName, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.labelMd.copyWith(color: AppColors.onSurface)),
+                  Text('${record.peerDevice.name} · ${FileSizeFormatter.format(record.totalSizeBytes)} · ${TimeFormatter.formatRelative(record.completedAt)}', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            Icon(record.isSuccess ? Icons.check_circle_outline : Icons.error_outline, size: 18, color: record.isSuccess ? AppColors.securityGreen : AppColors.error),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RadarRing extends StatelessWidget {
+  const _RadarRing({required this.progress, required this.size});
+  final double progress;
+  final double size;
+  @override
+  Widget build(BuildContext context) => Opacity(opacity: (1 - progress) * 0.3, child: Transform.scale(scale: 0.55 + progress * 0.45, child: Container(width: size, height: size, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.secondary.withValues(alpha: 0.65), width: 1)))));
 }

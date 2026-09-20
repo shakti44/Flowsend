@@ -175,6 +175,16 @@ class _HomeScreenState extends State<HomeScreen>
             Expanded(child: _QuickAction(icon: Icons.phone_android_outlined, label: 'New Phone', onTap: () => context.push(AppRoutes.newPhone))),
           ],
         ),
+        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: () => context.push(AppRoutes.crossPlatform),
+            icon: const Icon(Icons.public),
+            label: const Text('Cross-Platform'),
+          ),
+        ),
       ],
     );
   }

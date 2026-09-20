@@ -25,6 +25,7 @@ import '../features/new_phone/new_phone_content_screen.dart';
 import '../features/event_rescue/event_rescue_screen.dart';
 import '../features/event_rescue/event_join_scan_screen.dart';
 import '../features/event_rescue/event_contribution_screen.dart';
+import '../features/cross_platform/cross_platform_screen.dart';
 import '../features/collect/collect_screen.dart';
 
 /// Named route path constants — use these throughout the app.
@@ -52,6 +53,7 @@ abstract final class AppRoutes {
   static const eventRescue = '/event-rescue';
   static const eventJoinScan = '/event-join-scan';
   static const eventContribution = '/event-contribution';
+  static const crossPlatform = '/cross-platform';
 }
 
 /// Application router — main navigation shell with bottom tabs.
@@ -131,6 +133,7 @@ final appRouter = GoRouter(
     GoRoute(path: AppRoutes.eventRescue, name: 'event-rescue', builder: (context, state) => const EventRescueScreen()),
     GoRoute(path: AppRoutes.eventJoinScan, name: 'event-join-scan', builder: (context, state) => const EventJoinScanScreen()),
     GoRoute(path: AppRoutes.eventContribution, name: 'event-contribution', builder: (context, state) => EventContributionScreen(targetDevice: state.extra as DiscoveredDevice)),
+    GoRoute(path: AppRoutes.crossPlatform, name: 'cross-platform', builder: (context, state) => const CrossPlatformScreen()),
 
     // Transfer flow — full-page routes outside shell
     GoRoute(

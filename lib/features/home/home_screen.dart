@@ -193,11 +193,15 @@ class _HomeScreenState extends State<HomeScreen>
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) => SizedBox(
-        width: 154,
-        height: 154,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
+        width: 190,
+        height: 190,
+        child: Center(
+          child: SizedBox(
+            width: 154,
+            height: 154,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
             if (_devices.isEmpty) ...[
               _RadarRing(progress: _pulseController.value, size: 154),
               _RadarRing(progress: (_pulseController.value + 0.5) % 1, size: 132),
@@ -209,7 +213,9 @@ class _HomeScreenState extends State<HomeScreen>
               _buildOrbitalShortcut(index),
             Positioned(top: 3, right: 28, child: Container(width: 9, height: 9, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.secondaryContainer))),
             Positioned(bottom: 12, left: 25, child: Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primary))),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );

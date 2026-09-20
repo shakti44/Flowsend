@@ -14,6 +14,7 @@ class LanDeviceService implements DeviceService {
   final int discoveryPort;
   final int transferPort;
   final _controller = StreamController<List<DiscoveredDevice>>.broadcast();
+  final _eventController = StreamController<NearbyEventAnnouncement>.broadcast();
   final Map<String, DiscoveredDevice> _knownDevices = {};
   RawDatagramSocket? _socket;
   Timer? _announcementTimer;
@@ -21,9 +22,12 @@ class LanDeviceService implements DeviceService {
   bool _isAdvertising = false;
   late final String _deviceId = '${Platform.localHostname}-${DateTime.now().microsecondsSinceEpoch}';
   String? _deviceName;
+  String? _activeEventId;
+  String? _activeEventName;
 
   @override
   Stream<List<DiscoveredDevice>> get devicesStream => _controller.stream;
+  Stream<NearbyEventAnnouncement> get eventStream => _eventController.stream;
 
   @override
   List<DiscoveredDevice> get devices => List.unmodifiable(_knownDevices.values);
@@ -59,6 +63,21 @@ class LanDeviceService implements DeviceService {
     _stopIfUnused();
   }
 
+  Future<void> advertiseEvent({required String eventId, required String eventName}) async {
+    _activeEventId = eventId;
+    _activeEventName = eventName;
+    _isAdvertising = true;
+    await _ensureSocket();
+    _socket?.broadcastEnabled = true;
+    unawaited(_sendAnnouncement());
+  }
+
+  Future<void> stopEventAdvertising() async {
+    _activeEventId = null;
+    _activeEventName = null;
+    _stopIfUnused();
+  }
+
   Future<void> _ensureSocket() async {
     if (_socket != null) return;
     _socket = await RawDatagramSocket.bind(
@@ -89,6 +108,8 @@ class LanDeviceService implements DeviceService {
       'platform': _platform.name,
       'port': transferPort,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
+      if (_activeEventId != null)
+        'event': {'id': _activeEventId, 'name': _activeEventName, 'expires': DateTime.now().add(const Duration(minutes: 30)).millisecondsSinceEpoch},
     }));
     _socket?.send(
       payload,
@@ -149,6 +170,17 @@ class LanDeviceService implements DeviceService {
       );
       _knownDevices[id] = device;
       _controller.add(List.unmodifiable(_knownDevices.values));
+      final event = json['event'];
+      if (event is Map<String, dynamic> && event['id'] is String && event['name'] is String) {
+        final expires = event['expires'] as int? ?? 0;
+        if (expires > DateTime.now().millisecondsSinceEpoch) {
+          _eventController.add(NearbyEventAnnouncement(
+            eventId: event['id'] as String,
+            eventName: event['name'] as String,
+            device: device,
+          ));
+        }
+      }
     } on Object {
       // Ignore unrelated UDP traffic on the discovery port.
     }
@@ -173,7 +205,7 @@ class LanDeviceService implements DeviceService {
   }
 
   void _stopIfUnused() {
-    if (_isDiscovering || _isAdvertising) return;
+    if (_isDiscovering || _isAdvertising || _activeEventId != null) return;
     _announcementTimer?.cancel();
     _announcementTimer = null;
     _socket?.close();
@@ -187,5 +219,13 @@ class LanDeviceService implements DeviceService {
     _announcementTimer?.cancel();
     _socket?.close();
     _controller.close();
+    _eventController.close();
   }
+}
+
+class NearbyEventAnnouncement {
+  const NearbyEventAnnouncement({required this.eventId, required this.eventName, required this.device});
+  final String eventId;
+  final String eventName;
+  final DiscoveredDevice device;
 }

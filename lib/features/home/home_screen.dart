@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen>
   final _deviceService = LanDeviceService();
   List<DiscoveredDevice> _devices = const [];
   List<TransferRecord> _recentTransfers = const [];
+  final _seenEventIds = <String>{};
   late final AnimationController _pulseController;
 
   @override
@@ -42,8 +43,35 @@ class _HomeScreenState extends State<HomeScreen>
     _deviceService.devicesStream.listen((devices) {
       if (mounted) setState(() => _devices = devices);
     });
+    _deviceService.eventStream.listen(_showNearbyEvent);
     _deviceService.startDiscovery();
     _loadRecentTransfers();
+  }
+
+  void _showNearbyEvent(NearbyEventAnnouncement event) {
+    if (!mounted || !_seenEventIds.add(event.eventId)) return;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Nearby Event', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
+            const SizedBox(height: AppSpacing.xs),
+            Text('${event.device.name} created ${event.eventName}', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+            const SizedBox(height: AppSpacing.md),
+            Text('Contribute your photos?', style: AppTypography.labelLg.copyWith(color: AppColors.onSurface)),
+            const SizedBox(height: AppSpacing.md),
+            Row(children: [
+              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheetContext), child: const Text('Not Now'))),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: FilledButton(onPressed: () { Navigator.pop(sheetContext); context.push(AppRoutes.eventContribution, extra: event.device); }, child: const Text('Join'))),
+            ]),
+          ]),
+        ),
+      ),
+    );
   }
 
   Future<void> _loadRecentTransfers() async {

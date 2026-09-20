@@ -52,7 +52,7 @@ class _EventRescueScreenState extends State<EventRescueScreen> {
       final eventId = _uuid.v4();
       _receiver.outputDirectory = Directory('${documents.path}${Platform.pathSeparator}events${Platform.pathSeparator}$eventId');
       final port = await _receiver.start();
-      await _deviceService.startAdvertising();
+      await _deviceService.advertiseEvent(eventId: eventId, eventName: _nameController.text);
       final host = await _localAddress();
       if (mounted) setState(() => _payload = 'flowsend://event?session=$eventId&host=$host&port=$port&name=${Uri.encodeComponent(_nameController.text)}');
     } on Object catch (error) {
@@ -73,6 +73,7 @@ class _EventRescueScreenState extends State<EventRescueScreen> {
     _subscription?.cancel();
     _receiver.dispose();
     _deviceService.stopAdvertising();
+    _deviceService.stopEventAdvertising();
     _deviceService.dispose();
     _nameController.dispose();
     super.dispose();

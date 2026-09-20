@@ -245,6 +245,16 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
+        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: () => context.push(AppRoutes.collect),
+            icon: const Icon(Icons.collections_outlined),
+            label: const Text('Collect from nearby devices'),
+          ),
+        ),
       ],
     );
   }

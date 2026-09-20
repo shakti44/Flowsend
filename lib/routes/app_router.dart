@@ -18,6 +18,7 @@ import '../features/history/transfer_history_screen.dart';
 import '../features/devices/trusted_devices_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/settings/privacy_security_screen.dart';
+import '../features/collect/collect_screen.dart';
 
 /// Named route path constants — use these throughout the app.
 abstract final class AppRoutes {
@@ -36,6 +37,7 @@ abstract final class AppRoutes {
   static const devices = '/devices';
   static const settings = '/settings';
   static const privacySecurity = '/privacy-security';
+  static const collect = '/collect';
 }
 
 /// Application router — main navigation shell with bottom tabs.
@@ -82,6 +84,12 @@ final appRouter = GoRouter(
       path: AppRoutes.privacySecurity,
       name: 'privacy-security',
       builder: (context, state) => const PrivacySecurityScreen(),
+    ),
+
+    GoRoute(
+      path: AppRoutes.collect,
+      name: 'collect',
+      builder: (context, state) => const CollectScreen(),
     ),
 
     // Transfer flow — full-page routes outside shell

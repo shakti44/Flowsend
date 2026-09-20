@@ -9,8 +9,9 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../services/network_service/tcp_transfer_transport.dart';
-import '../../services/device_service/lan_device_service.dart';
 import '../../core/utils/file_size_formatter.dart';
+import '../../routes/app_router.dart';
+import '../../services/device_service/lan_device_service.dart';
 
 /// Receive Screen — stub for Phase 2.
 class ReceiveScreen extends StatefulWidget {
@@ -28,6 +29,8 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
   IncomingTransferProgress? _progress;
   List<String> _receivedPaths = const [];
   StreamSubscription<IncomingTransferProgress>? _progressSubscription;
+  StreamSubscription<NearbyEventAnnouncement>? _eventSubscription;
+  final _seenEventIds = <String>{};
 
   @override
   void initState() {
@@ -40,6 +43,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
         });
       }
     });
+    _eventSubscription = _deviceService.eventStream.listen(_showNearbyEvent);
     _startReceiver();
   }
 
@@ -60,10 +64,37 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
   @override
   void dispose() {
     _progressSubscription?.cancel();
+    _eventSubscription?.cancel();
     _receiver.dispose();
     _deviceService.stopAdvertising();
     _deviceService.dispose();
     super.dispose();
+  }
+
+  void _showNearbyEvent(NearbyEventAnnouncement event) {
+    if (!mounted || !_seenEventIds.add(event.eventId)) return;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surfaceContainerHigh,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Nearby Event', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
+            const SizedBox(height: AppSpacing.xs),
+            Text('${event.device.name} created ${event.eventName}', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+            const SizedBox(height: AppSpacing.md),
+            Text('Contribute your photos?', style: AppTypography.labelLg.copyWith(color: AppColors.onSurface)),
+            const SizedBox(height: AppSpacing.md),
+            Row(children: [
+              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheetContext), child: const Text('Not Now'))),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: FilledButton(onPressed: () { Navigator.pop(sheetContext); context.push(AppRoutes.eventContribution, extra: event.device); }, child: const Text('Join'))),
+            ]),
+          ]),
+        ),
+      ),
+    );
   }
 
   @override

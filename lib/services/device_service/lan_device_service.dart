@@ -91,7 +91,7 @@ class LanDeviceService implements DeviceService {
       if (event != RawSocketEvent.read) return;
       final datagram = _socket!.receive();
       if (datagram == null) return;
-      _handleAnnouncement(datagram);
+      unawaited(_handleAnnouncement(datagram));
     });
     _announcementTimer = Timer.periodic(
       const Duration(seconds: 3),
@@ -101,21 +101,8 @@ class LanDeviceService implements DeviceService {
 
   Future<void> _sendAnnouncement() async {
     if (!_isAdvertising && !_isDiscovering) return;
-    final deviceName = await _getDeviceName();
-    final payload = utf8.encode(jsonEncode({
-      'id': _deviceId,
-      'name': deviceName,
-      'platform': _platform.name,
-      'port': transferPort,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-      if (_activeEventId != null)
-        'event': {'id': _activeEventId, 'name': _activeEventName, 'expires': DateTime.now().add(const Duration(minutes: 30)).millisecondsSinceEpoch},
-    }));
-    _socket?.send(
-      payload,
-      InternetAddress('255.255.255.255'),
-      discoveryPort,
-    );
+    final payload = await _announcementPayload();
+    _socket?.send(payload, InternetAddress('255.255.255.255'), discoveryPort);
 
     // Some Android access points isolate or drop broadcast packets. Probe the
     // common local /24 directly so discovery still works on those networks.
@@ -138,6 +125,19 @@ class LanDeviceService implements DeviceService {
     }
   }
 
+  Future<List<int>> _announcementPayload() async {
+    final deviceName = await _getDeviceName();
+    return utf8.encode(jsonEncode({
+      'id': _deviceId,
+      'name': deviceName,
+      'platform': _platform.name,
+      'port': transferPort,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      if (_activeEventId != null)
+        'event': {'id': _activeEventId, 'name': _activeEventName, 'expires': DateTime.now().add(const Duration(minutes: 30)).millisecondsSinceEpoch},
+    }));
+  }
+
   Future<String> _getDeviceName() async {
     if (_deviceName != null) return _deviceName!;
     try {
@@ -152,7 +152,7 @@ class LanDeviceService implements DeviceService {
     return _deviceName = Platform.localHostname;
   }
 
-  void _handleAnnouncement(Datagram datagram) {
+  Future<void> _handleAnnouncement(Datagram datagram) async {
     try {
       final json = jsonDecode(utf8.decode(datagram.data)) as Map<String, dynamic>;
       final id = json['id'] as String?;
@@ -170,6 +170,10 @@ class LanDeviceService implements DeviceService {
       );
       _knownDevices[id] = device;
       _controller.add(List.unmodifiable(_knownDevices.values));
+      if (_isAdvertising || _activeEventId != null) {
+        final response = await _announcementPayload();
+        _socket?.send(response, datagram.address, discoveryPort);
+      }
       final event = json['event'];
       if (event is Map<String, dynamic> && event['id'] is String && event['name'] is String) {
         final expires = event['expires'] as int? ?? 0;

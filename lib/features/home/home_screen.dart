@@ -157,6 +157,8 @@ class _HomeScreenState extends State<HomeScreen>
         Text('Share anything', style: AppTypography.headlineLgMobile.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w700)),
         const SizedBox(height: AppSpacing.xs),
         Text('Photos  •  Videos  •  Apps  •  Files', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+        const SizedBox(height: AppSpacing.xs),
+        Text('SHARE WITHOUT LIMITS', style: AppTypography.labelSm.copyWith(color: AppColors.secondary, letterSpacing: 1.8)),
         const SizedBox(height: AppSpacing.lg),
         _buildOrb(),
         const SizedBox(height: AppSpacing.lg),

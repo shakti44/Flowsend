@@ -33,108 +33,39 @@ class _LogoPainter extends CustomPainter {
     );
 
     final rect = Rect.fromLTWH(0, 0, w, h);
-    final gradientPaint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = w * 0.035;
-
-    // Background rounded square
-    final bgPaint = Paint()
-      ..color = const Color(0xFF0A0F1D)
-      ..style = PaintingStyle.fill;
+    final bgPaint = Paint()..color = const Color(0xFF071126);
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, Radius.circular(w * 0.24)),
       bgPaint,
     );
 
-    // Border stroke with gradient
     final borderPaint = Paint()
       ..shader = gradient.createShader(rect)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = w * 0.015
-      ..color = AppColors.primaryContainer.withValues(alpha: 0.3);
+      ..strokeWidth = w * 0.018;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        rect.deflate(w * 0.015),
-        Radius.circular(w * 0.225),
-      ),
+      RRect.fromRectAndRadius(rect.deflate(w * 0.018), Radius.circular(w * 0.22)),
       borderPaint,
     );
 
-    // Phone node (circle at bottom-left)
-    final phonePaint = Paint()
+    final markPaint = Paint()
       ..shader = gradient.createShader(rect)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = w * 0.035;
-    canvas.drawCircle(Offset(w * 0.28, h * 0.62), w * 0.10, phonePaint);
-
-    // Phone center dot
-    final dotPaint = Paint()
-      ..color = AppColors.secondaryContainer
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w * 0.28, h * 0.62), w * 0.04, dotPaint);
-
-    // Laptop node (rect at top-right)
-    final laptopRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.62, h * 0.26, w * 0.18, h * 0.26),
-      const Radius.circular(4),
-    );
-    canvas.drawRRect(laptopRect, gradientPaint);
-
-    // Laptop dot
-    final laptopDotPaint = Paint()
-      ..color = AppColors.tertiaryContainer
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w * 0.71, h * 0.46), w * 0.015, laptopDotPaint);
-
-    // Dashed arc stream (phone → laptop)
-    final streamPath = Path()
-      ..moveTo(w * 0.34, h * 0.56)
-      ..cubicTo(w * 0.42, h * 0.42, w * 0.54, h * 0.36, w * 0.62, h * 0.36);
-
-    // Draw dashed path
-    _drawDashedPath(canvas, streamPath, gradientPaint, w * 0.035, 3, 3);
-
-    // Arrow head
-    final arrowPaint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.075
       ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..strokeWidth = w * 0.035;
-    final arrowPath = Path()
-      ..moveTo(w * 0.56, h * 0.31)
-      ..lineTo(w * 0.65, h * 0.36)
-      ..lineTo(w * 0.57, h * 0.42);
-    canvas.drawPath(arrowPath, arrowPaint);
-  }
-
-  void _drawDashedPath(
-    Canvas canvas,
-    Path path,
-    Paint paint,
-    double strokeWidth,
-    double dashLength,
-    double gapLength,
-  ) {
-    final dashPaint = Paint()
-      ..shader = paint.shader
-      ..color = paint.color
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = strokeWidth;
-
-    final metrics = path.computeMetrics();
-    for (final metric in metrics) {
-      double distance = 0;
-      while (distance < metric.length) {
-        final start = distance;
-        final end = (distance + dashLength).clamp(0.0, metric.length);
-        canvas.drawPath(metric.extractPath(start, end), dashPaint);
-        distance += dashLength + gapLength;
-      }
-    }
+      ..strokeJoin = StrokeJoin.round;
+    final flowPath = Path()
+      ..moveTo(w * 0.24, h * 0.62)
+      ..cubicTo(w * 0.32, h * 0.78, w * 0.48, h * 0.78, w * 0.57, h * 0.57)
+      ..cubicTo(w * 0.66, h * 0.36, w * 0.81, h * 0.36, w * 0.78, h * 0.55);
+    canvas.drawPath(flowPath, markPaint);
+    canvas.drawCircle(Offset(w * 0.24, h * 0.62), w * 0.10, markPaint);
+    canvas.drawCircle(Offset(w * 0.78, h * 0.55), w * 0.10, markPaint);
+    final arrow = Path()
+      ..moveTo(w * 0.47, h * 0.48)
+      ..lineTo(w * 0.62, h * 0.48)
+      ..lineTo(w * 0.55, h * 0.40);
+    canvas.drawPath(arrow, markPaint);
   }
 
   @override

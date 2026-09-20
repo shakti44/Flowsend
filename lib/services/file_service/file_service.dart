@@ -15,6 +15,9 @@ abstract class FileService {
   /// Pick files filtered to documents (PDF, Office, etc.).
   Future<List<SelectedFile>> pickDocuments();
 
+  /// Pick Android APK packages where the platform exposes them.
+  Future<List<SelectedFile>> pickApps();
+
   /// Pick a directory and return all files within it (recursive).
   Future<List<SelectedFile>> pickDirectory();
 

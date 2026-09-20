@@ -62,6 +62,18 @@ class FilePickerService implements FileService {
   }
 
   @override
+  Future<List<SelectedFile>> pickApps() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['apk'],
+      allowMultiple: true,
+      withData: false,
+      withReadStream: true,
+    );
+    return _convertResult(result);
+  }
+
+  @override
   Future<List<SelectedFile>> pickDirectory() async {
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: true,

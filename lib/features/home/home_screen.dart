@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +16,7 @@ import '../../services/history_service.dart';
 import '../../widgets/device_chip.dart';
 import '../../widgets/flowsend_logo.dart';
 import '../../widgets/primary_pill_button.dart';
+import '../file_selection/file_selection_screen.dart';
 import '../../routes/app_router.dart';
 import 'flow_assistant_sheet.dart';
 
@@ -193,9 +195,50 @@ class _HomeScreenState extends State<HomeScreen>
             Container(width: 154, height: 154, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.secondary.withValues(alpha: 0.14 + _pulseController.value * 0.14), width: 1))),
             Container(width: 126, height: 126, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surfaceContainerLow, border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.55)), boxShadow: [BoxShadow(color: AppColors.primaryContainer.withValues(alpha: 0.13), blurRadius: 28, spreadRadius: 2)])),
             const FlowSendLogoOrb(size: 82),
+            for (var index = 0; index < _orbitalShortcuts.length; index++)
+              _buildOrbitalShortcut(index),
             Positioned(top: 3, right: 28, child: Container(width: 9, height: 9, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.secondaryContainer))),
             Positioned(bottom: 12, left: 25, child: Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primary))),
           ],
+        ),
+      ),
+    );
+  }
+
+  static const _orbitalShortcuts = [
+    (FileSelectionCategory.photos, Icons.image_outlined, 'Photos'),
+    (FileSelectionCategory.videos, Icons.play_circle_outline, 'Videos'),
+    (FileSelectionCategory.documents, Icons.description_outlined, 'Documents'),
+    (FileSelectionCategory.apps, Icons.android, 'Apps'),
+    (FileSelectionCategory.files, Icons.folder_outlined, 'Files'),
+  ];
+
+  Widget _buildOrbitalShortcut(int index) {
+    final shortcut = _orbitalShortcuts[index];
+    final angle = _pulseController.value * math.pi * 2 + index * math.pi * 2 / _orbitalShortcuts.length;
+    const radius = 86.0;
+    return Transform.translate(
+      offset: Offset(math.cos(angle) * radius, math.sin(angle) * radius),
+      child: Tooltip(
+        message: shortcut.$3,
+        child: Semantics(
+          button: true,
+          label: shortcut.$3,
+          child: InkWell(
+            onTap: () => context.push(AppRoutes.selectFiles, extra: {'category': shortcut.$1}),
+            borderRadius: BorderRadius.circular(18),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.secondary.withValues(alpha: 0.45)),
+                boxShadow: [BoxShadow(color: AppColors.secondary.withValues(alpha: 0.18), blurRadius: 12)],
+              ),
+              child: Icon(shortcut.$2, size: 20, color: AppColors.secondary),
+            ),
+          ),
         ),
       ),
     );

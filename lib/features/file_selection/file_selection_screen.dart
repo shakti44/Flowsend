@@ -59,6 +59,8 @@ class _FileSelectionScreenState extends State<FileSelectionScreen> {
           picked = await _fileService.pickVideos();
         case FileSelectionCategory.documents:
           picked = await _fileService.pickDocuments();
+        case FileSelectionCategory.apps:
+          picked = await _fileService.pickApps();
         case FileSelectionCategory.files:
           picked = await _fileService.pickFiles();
         case FileSelectionCategory.folders:
@@ -524,6 +526,7 @@ enum FileSelectionCategory {
   photos(Icons.photo_library, 'Photos'),
   videos(Icons.videocam_outlined, 'Videos'),
   documents(Icons.description_outlined, 'Documents'),
+  apps(Icons.android, 'Apps / APKs'),
   files(Icons.insert_drive_file_outlined, 'Files'),
   folders(Icons.inventory_2_outlined, 'Folders');
 

@@ -52,6 +52,7 @@ dependencies:
 
   # Contextual voice commands for Flow Assistant
   speech_to_text: ^7.3.0
+  mobile_scanner: ^6.0.2
 
   cupertino_icons: ^1.0.8
 

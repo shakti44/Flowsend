@@ -5,6 +5,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/utils/file_size_formatter.dart';
 import '../../models/selected_file.dart';
+import '../../models/discovered_device.dart';
 import '../../services/file_service/file_picker_service.dart';
 import '../../services/file_service/file_service.dart';
 import '../../widgets/file_item_card.dart';
@@ -13,9 +14,10 @@ import '../../routes/app_router.dart';
 /// File Selection Screen — matches Stitch select_files design.
 /// Filter chips, file queue cards, total size bar, Continue CTA.
 class FileSelectionScreen extends StatefulWidget {
-  const FileSelectionScreen({super.key, this.initialCategory});
+  const FileSelectionScreen({super.key, this.initialCategory, this.targetDevice});
 
   final FileSelectionCategory? initialCategory;
+  final DiscoveredDevice? targetDevice;
 
   @override
   State<FileSelectionScreen> createState() => _FileSelectionScreenState();
@@ -92,6 +94,13 @@ class _FileSelectionScreenState extends State<FileSelectionScreen> {
 
   void _continue() {
     if (_selectedFiles.isEmpty) return;
+    if (widget.targetDevice != null) {
+      context.push(AppRoutes.smartTransferCheck, extra: {
+        'files': _selectedFiles,
+        'devices': [widget.targetDevice!],
+      });
+      return;
+    }
     context.push(AppRoutes.chooseDevice, extra: _selectedFiles);
   }
 

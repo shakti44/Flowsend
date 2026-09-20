@@ -19,6 +19,9 @@ import '../features/devices/trusted_devices_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/settings/privacy_security_screen.dart';
 import '../features/new_phone/new_phone_screen.dart';
+import '../features/new_phone/new_phone_ready_screen.dart';
+import '../features/new_phone/new_phone_scan_screen.dart';
+import '../features/new_phone/new_phone_content_screen.dart';
 import '../features/collect/collect_screen.dart';
 
 /// Named route path constants — use these throughout the app.
@@ -40,6 +43,9 @@ abstract final class AppRoutes {
   static const privacySecurity = '/privacy-security';
   static const collect = '/collect';
   static const newPhone = '/new-phone';
+  static const newPhoneReady = '/new-phone-ready';
+  static const newPhoneScan = '/new-phone-scan';
+  static const newPhoneContent = '/new-phone-content';
 }
 
 /// Application router — main navigation shell with bottom tabs.
@@ -99,6 +105,23 @@ final appRouter = GoRouter(
       name: 'new-phone',
       builder: (context, state) => const NewPhoneScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.newPhoneReady,
+      name: 'new-phone-ready',
+      builder: (context, state) => const NewPhoneReadyScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.newPhoneScan,
+      name: 'new-phone-scan',
+      builder: (context, state) => const NewPhoneScanScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.newPhoneContent,
+      name: 'new-phone-content',
+      builder: (context, state) => NewPhoneContentScreen(
+        targetDevice: state.extra as DiscoveredDevice,
+      ),
+    ),
 
     // Transfer flow — full-page routes outside shell
     GoRoute(
@@ -109,6 +132,9 @@ final appRouter = GoRouter(
         return FileSelectionScreen(
           initialCategory: extra is Map<String, dynamic>
               ? extra['category'] as FileSelectionCategory?
+              : null,
+            targetDevice: extra is Map<String, dynamic>
+              ? extra['targetDevice'] as DiscoveredDevice?
               : null,
         );
       },

@@ -152,8 +152,37 @@ class LanDeviceService implements DeviceService {
     return _deviceName = Platform.localHostname;
   }
 
+  Set<String>? _ownAddressesCache;
+  DateTime? _ownAddressesCacheTime;
+
+  /// Own-instance ids differ per [LanDeviceService] object (they include a
+  /// construction timestamp), so a second instance running in this same app
+  /// (e.g. the home screen's preview scanner alongside the Choose Device
+  /// screen) would otherwise show up as a distinct "nearby" peer with this
+  /// device's own name. Matching on local IP addresses catches that case
+  /// regardless of which/how many instances are running.
+  Future<bool> _isOwnAddress(InternetAddress address) async {
+    final now = DateTime.now();
+    if (_ownAddressesCache == null ||
+        _ownAddressesCacheTime == null ||
+        now.difference(_ownAddressesCacheTime!) > const Duration(seconds: 10)) {
+      final interfaces = await NetworkInterface.list(
+        includeLoopback: false,
+        includeLinkLocal: false,
+        type: InternetAddressType.IPv4,
+      );
+      _ownAddressesCache = {
+        for (final interface in interfaces)
+          for (final addr in interface.addresses) addr.address,
+      };
+      _ownAddressesCacheTime = now;
+    }
+    return _ownAddressesCache!.contains(address.address);
+  }
+
   Future<void> _handleAnnouncement(Datagram datagram) async {
     try {
+      if (await _isOwnAddress(datagram.address)) return;
       final json = jsonDecode(utf8.decode(datagram.data)) as Map<String, dynamic>;
       final id = json['id'] as String?;
       if (id == null || id == _deviceId) return;

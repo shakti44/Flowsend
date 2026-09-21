@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'routes/app_router.dart';
@@ -8,6 +9,10 @@ import 'features/settings/privacy_security_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Fonts aren't bundled as assets, so avoid blocking/slowing launch on a
+  // network fetch — fall back to the platform default font instantly instead.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Force portrait orientation on mobile for Phase 1
   SystemChrome.setPreferredOrientations([
@@ -38,7 +43,15 @@ class FlowSendApp extends StatefulWidget {
 }
 
 class _FlowSendAppState extends State<FlowSendApp> {
-  late final Future<bool> _introFuture = _hasCompletedIntro();
+  bool? _introCompleted;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasCompletedIntro().then((completed) {
+      if (mounted) setState(() => _introCompleted = completed);
+    });
+  }
 
   Future<bool> _hasCompletedIntro() async {
     try {
@@ -52,40 +65,35 @@ class _FlowSendAppState extends State<FlowSendApp> {
   Future<void> _completeIntro() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool('privacy_intro_completed', true);
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _introCompleted = true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _introFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.dark,
-            home: const _IntroLoadingScreen(),
-          );
-        }
-        if (snapshot.data == false) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.dark,
-            home: PrivacyIntroScreen(
-              onContinue: _completeIntro,
-              onPrivacyPolicy: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const PrivacySecurityScreen()),
-              ),
-            ),
-          );
-        }
-        return MaterialApp.router(
-          title: 'FlowSend',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.dark,
-          routerConfig: appRouter,
-        );
-      },
+    if (_introCompleted == null) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        home: const _IntroLoadingScreen(),
+      );
+    }
+    if (_introCompleted == false) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        home: PrivacyIntroScreen(
+          onContinue: _completeIntro,
+          onPrivacyPolicy: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const PrivacySecurityScreen()),
+          ),
+        ),
+      );
+    }
+    return MaterialApp.router(
+      title: 'FlowSend',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark,
+      routerConfig: appRouter,
     );
   }
 }

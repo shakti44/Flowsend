@@ -15,6 +15,22 @@ enum DevicePlatform {
   unknown,
 }
 
+/// How FlowSend will reach this device for a transfer. Chosen automatically
+/// by the Smart Connection layer — the user never sees these details.
+enum ConnectionMethod {
+  /// Both devices already reachable on the same Wi-Fi/LAN subnet.
+  lan,
+
+  /// No common Wi-Fi network — a direct Wi-Fi Direct (P2P) link is used.
+  wifiDirect,
+
+  /// Wi-Fi Direct is unavailable — a Local-Only Hotspot fallback is used.
+  localHotspot,
+
+  /// Method not yet determined.
+  unknown,
+}
+
 class DiscoveredDevice {
   const DiscoveredDevice({
     required this.id,
@@ -27,7 +43,16 @@ class DiscoveredDevice {
     this.protocolInfo,
     this.lastSeen,
     this.isTrusted = false,
+    this.connectionMethod = ConnectionMethod.unknown,
+    this.p2pDeviceAddress,
   });
+
+  /// Wi-Fi Direct peer MAC address, present only for devices discovered via
+  /// Wi-Fi Direct before a P2P group/IP address exists.
+  final String? p2pDeviceAddress;
+
+  /// Best connection path Smart Connection determined for this device.
+  final ConnectionMethod connectionMethod;
 
   /// Unique device identifier (hardware ID or session ID).
   final String id;
@@ -76,6 +101,8 @@ class DiscoveredDevice {
     String? protocolInfo,
     DateTime? lastSeen,
     bool? isTrusted,
+    ConnectionMethod? connectionMethod,
+    String? p2pDeviceAddress,
   }) {
     return DiscoveredDevice(
       id: id ?? this.id,
@@ -88,6 +115,8 @@ class DiscoveredDevice {
       protocolInfo: protocolInfo ?? this.protocolInfo,
       lastSeen: lastSeen ?? this.lastSeen,
       isTrusted: isTrusted ?? this.isTrusted,
+      connectionMethod: connectionMethod ?? this.connectionMethod,
+      p2pDeviceAddress: p2pDeviceAddress ?? this.p2pDeviceAddress,
     );
   }
 

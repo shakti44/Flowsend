@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,7 @@ import '../../core/utils/time_formatter.dart';
 import '../../models/discovered_device.dart';
 import '../../models/selected_file.dart';
 import '../../models/transfer_session.dart';
+import '../../services/connection_service/smart_connection_service.dart';
 import '../../services/transfer_service/transfer_service.dart';
 import '../../widgets/transfer_ring.dart';
 import '../../widgets/device_chip.dart';
@@ -49,6 +52,10 @@ class _ActiveTransferScreenState extends State<ActiveTransferScreen> {
   @override
   void dispose() {
     _transferService.dispose();
+    // No-op unless this transfer used a temporary Wi-Fi Direct group.
+    if (widget.device.connectionMethod == ConnectionMethod.wifiDirect) {
+      unawaited(SmartConnectionService.instance.cleanup());
+    }
     super.dispose();
   }
 

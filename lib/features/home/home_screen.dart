@@ -242,7 +242,9 @@ class _HomeScreenState extends State<HomeScreen>
           button: true,
           label: shortcut.$3,
           child: InkWell(
-            onTap: () => context.push(AppRoutes.selectFiles, extra: {'category': shortcut.$1}),
+            onTap: () => shortcut.$1 == FileSelectionCategory.apps
+                ? context.push(AppRoutes.flowSendApps)
+                : context.push(AppRoutes.selectFiles, extra: {'category': shortcut.$1}),
             borderRadius: BorderRadius.circular(18),
             child: Container(
               width: 38,

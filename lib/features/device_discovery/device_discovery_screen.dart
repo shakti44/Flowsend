@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
@@ -7,7 +10,7 @@ import '../../core/utils/file_size_formatter.dart';
 import '../../models/discovered_device.dart';
 import '../../models/selected_file.dart';
 import '../../services/device_service/device_service.dart';
-import '../../services/device_service/lan_device_service.dart';
+import '../../services/device_service/smart_device_service.dart';
 import '../../widgets/radar_canvas.dart';
 import '../../widgets/device_chip.dart';
 import '../../routes/app_router.dart';
@@ -28,7 +31,7 @@ class DeviceDiscoveryScreen extends StatefulWidget {
 }
 
 class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
-  final DeviceService _deviceService = LanDeviceService();
+  final DeviceService _deviceService = SmartDeviceService();
   final List<DiscoveredDevice> _devices = [];
   final Set<String> _selectedDeviceIds = {};
   bool _isScanning = false;
@@ -50,6 +53,11 @@ class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
   Future<void> _startDiscovery() async {
     if (!mounted) return;
     setState(() => _isScanning = true);
+    // Wi-Fi Direct discovery needs this on Android before it will find peers
+    // that aren't on the same Wi-Fi network. LAN discovery works either way.
+    if (Platform.isAndroid) {
+      await Permission.nearbyWifiDevices.request();
+    }
     await _deviceService.startDiscovery();
     if (mounted) setState(() => _isScanning = false);
   }
@@ -580,6 +588,19 @@ class _DeviceListItem extends StatelessWidget {
                       device.protocolInfo!,
                       style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                       overflow: TextOverflow.ellipsis,
+                    ),
+                  if (device.connectionMethod == ConnectionMethod.wifiDirect)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.bolt, size: 12, color: AppColors.secondary),
+                          const SizedBox(width: 2),
+                          Text('Direct connection · No internet required',
+                              style: AppTypography.labelSm.copyWith(color: AppColors.secondary)),
+                        ],
+                      ),
                     ),
                 ],
               ),

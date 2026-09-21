@@ -49,6 +49,12 @@ class _FileSelectionScreenState extends State<FileSelectionScreen> {
 
   Future<void> _pickFiles(FileSelectionCategory category) async {
     if (_isLoading) return;
+    if (category == FileSelectionCategory.apps) {
+      // Apps get their own dedicated screen instead of the generic picker.
+      setState(() => _activeCategory = category);
+      await context.push(AppRoutes.flowSendApps);
+      return;
+    }
     setState(() => _isLoading = true);
     try {
       List<SelectedFile> picked;
@@ -60,7 +66,7 @@ class _FileSelectionScreenState extends State<FileSelectionScreen> {
         case FileSelectionCategory.documents:
           picked = await _fileService.pickDocuments();
         case FileSelectionCategory.apps:
-          picked = await _fileService.pickApps();
+          picked = const [];
         case FileSelectionCategory.files:
           picked = await _fileService.pickFiles();
         case FileSelectionCategory.folders:

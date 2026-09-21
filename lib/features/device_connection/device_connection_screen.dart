@@ -6,6 +6,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../models/discovered_device.dart';
 import '../../models/selected_file.dart';
+import '../../services/connection_service/smart_connection_service.dart';
 import '../../widgets/device_chip.dart';
 import '../../routes/app_router.dart';
 
@@ -35,17 +36,32 @@ class _DeviceConnectionScreenState extends State<DeviceConnectionScreen>
   int _countdown = 2;
   Timer? _countdownTimer;
   Timer? _connectTimer;
+  DiscoveredDevice _connectedDevice = const DiscoveredDevice(
+    id: '',
+    name: '',
+    platform: DevicePlatform.unknown,
+    status: DeviceStatus.offline,
+  );
+  String? _connectionError;
+
+  bool get _isWifiDirect => widget.device.connectionMethod == ConnectionMethod.wifiDirect;
 
   String get _statusTitle => _isConnected
       ? '${widget.device.name} Connected'
       : 'Connecting to ${widget.device.name}...';
 
-  String get _statusSubtitle =>
-      _isConnected ? 'Cryptographic channel locked' : 'Negotiating direct peer tunnel';
+  String get _statusSubtitle {
+    if (_connectionError != null) return _connectionError!;
+    if (_isConnected) {
+      return _isWifiDirect ? '⚡ Direct connection · No internet required' : 'Cryptographic channel locked';
+    }
+    return _isWifiDirect ? 'Establishing direct device-to-device link' : 'Negotiating direct peer tunnel';
+  }
 
   @override
   void initState() {
     super.initState();
+    _connectedDevice = widget.device;
 
     _packetController = AnimationController(
       vsync: this,
@@ -60,14 +76,38 @@ class _DeviceConnectionScreenState extends State<DeviceConnectionScreen>
       CurvedAnimation(parent: _fillController, curve: Curves.easeInOut),
     );
 
-    // Simulate handshake completion after 700ms
-    _connectTimer = Timer(const Duration(milliseconds: 700), () {
-      if (mounted) {
-        setState(() => _isConnected = true);
-        _fillController.forward();
-        _startCountdown();
-      }
-    });
+    if (_isWifiDirect) {
+      _connectViaSmartConnection();
+    } else {
+      // Same-Wi-Fi devices already have a reachable address — keep the
+      // existing lightweight handshake animation unchanged.
+      _connectTimer = Timer(const Duration(milliseconds: 700), () {
+        if (mounted) {
+          setState(() => _isConnected = true);
+          _fillController.forward();
+          _startCountdown();
+        }
+      });
+    }
+  }
+
+  Future<void> _connectViaSmartConnection() async {
+    try {
+      final resolved = await SmartConnectionService.instance.connect(widget.device);
+      if (!mounted) return;
+      setState(() {
+        _connectedDevice = resolved;
+        _isConnected = true;
+      });
+      _fillController.forward();
+      _startCountdown();
+    } on SmartConnectionException catch (error) {
+      if (!mounted) return;
+      setState(() => _connectionError = error.message);
+    } on Object {
+      if (!mounted) return;
+      setState(() => _connectionError = 'Could not establish a direct connection to ${widget.device.name}.');
+    }
   }
 
   void _startCountdown() {
@@ -91,7 +131,7 @@ class _DeviceConnectionScreenState extends State<DeviceConnectionScreen>
     if (!mounted) return;
     context.pushReplacement(
       AppRoutes.activeTransfer,
-      extra: {'files': widget.files, 'device': widget.device},
+      extra: {'files': widget.files, 'device': _connectedDevice},
     );
   }
 
@@ -112,7 +152,9 @@ class _DeviceConnectionScreenState extends State<DeviceConnectionScreen>
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
+          child: _connectionError != null
+              ? _buildErrorState()
+              : Column(
             children: [
               // Status header
               _buildStatusHeader(),
@@ -128,7 +170,9 @@ class _DeviceConnectionScreenState extends State<DeviceConnectionScreen>
 
               // Subtext
               Text(
-                'Zero configuration required. Handshake completed in 0.2s.',
+                _isWifiDirect
+                    ? 'No Wi-Fi network required. Connected device-to-device.'
+                    : 'Zero configuration required. Handshake completed in 0.2s.',
                 style: AppTypography.bodySm.copyWith(color: AppColors.outline),
                 textAlign: TextAlign.center,
               ),
@@ -140,7 +184,7 @@ class _DeviceConnectionScreenState extends State<DeviceConnectionScreen>
 
               // Cancel link
               TextButton(
-                onPressed: () => context.pop(),
+                onPressed: _cancelConnection,
                 child: Text(
                   'Cancel connection',
                   style: AppTypography.labelMd.copyWith(color: AppColors.outline),
@@ -150,6 +194,48 @@ class _DeviceConnectionScreenState extends State<DeviceConnectionScreen>
           ),
         ),
       ),
+    );
+  }
+
+  void _cancelConnection() {
+    if (_isWifiDirect) {
+      unawaited(SmartConnectionService.instance.cleanup());
+    }
+    if (mounted) context.pop();
+  }
+
+  Widget _buildErrorState() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: AppSpacing.xl),
+        const Icon(Icons.wifi_tethering_off, size: 48, color: AppColors.error),
+        const SizedBox(height: AppSpacing.md),
+        Text('Direct connection failed',
+            style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
+            textAlign: TextAlign.center),
+        const SizedBox(height: AppSpacing.sm),
+        Text(_connectionError!,
+            style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+            textAlign: TextAlign.center),
+        const SizedBox(height: AppSpacing.lg),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: FilledButton(
+            onPressed: () {
+              setState(() => _connectionError = null);
+              _connectViaSmartConnection();
+            },
+            child: const Text('Try again'),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        TextButton(
+          onPressed: _cancelConnection,
+          child: Text('Back', style: AppTypography.labelMd.copyWith(color: AppColors.outline)),
+        ),
+      ],
     );
   }
 

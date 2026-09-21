@@ -10,8 +10,14 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 
 class MainActivity : FlutterActivity() {
+	private var wifiDirectManager: WifiDirectManager? = null
+
 	override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
 		super.configureFlutterEngine(flutterEngine)
+		wifiDirectManager = WifiDirectManager(this, flutterEngine.dartExecutor.binaryMessenger).also {
+			it.attach()
+		}
+		InstalledAppsManager(this, flutterEngine.dartExecutor.binaryMessenger).attach()
 		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "flowsend/device")
 			.setMethodCallHandler { call, result ->
 				if (call.method == "deviceName") {
@@ -49,5 +55,15 @@ class MainActivity : FlutterActivity() {
 					result.notImplemented()
 				}
 			}
+	}
+
+	override fun onResume() {
+		super.onResume()
+		wifiDirectManager?.onResume()
+	}
+
+	override fun onPause() {
+		wifiDirectManager?.onPause()
+		super.onPause()
 	}
 }

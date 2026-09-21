@@ -14,9 +14,10 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
-    <!-- Wi-Fi Direct (Phase 3) -->
+    <!-- Wi-Fi Direct (Smart Connection: no common Wi-Fi network) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" />
+    <uses-feature android:name="android.hardware.wifi.direct" android:required="false" />
 
     <!-- Bluetooth LE (Phase 3) -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />

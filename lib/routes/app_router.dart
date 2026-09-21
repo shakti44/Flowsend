@@ -5,6 +5,7 @@ import '../models/selected_file.dart';
 import '../models/transfer_session.dart';
 import '../features/home/home_screen.dart';
 import '../features/file_selection/file_selection_screen.dart';
+import '../features/apps/flowsend_apps_screen.dart';
 import '../features/device_discovery/device_discovery_screen.dart';
 import '../features/device_discovery/transfer_session_screen.dart';
 import '../features/device_connection/device_connection_screen.dart';
@@ -32,6 +33,7 @@ import '../features/collect/collect_screen.dart';
 abstract final class AppRoutes {
   static const home = '/';
   static const selectFiles = '/select-files';
+  static const flowSendApps = '/flowsend-apps';
   static const chooseDevice = '/choose-device';
   static const transferSession = '/transfer-session';
   static const deviceConnection = '/device-connection';
@@ -158,6 +160,17 @@ final appRouter = GoRouter(
       builder: (context, state) {
         final files = state.extra as List<SelectedFile>? ?? [];
         return DeviceDiscoveryScreen(selectedFiles: files);
+      },
+    ),
+
+    GoRoute(
+      path: AppRoutes.flowSendApps,
+      name: 'flowsend-apps',
+      builder: (context, state) {
+        final extra = state.extra;
+        return FlowSendAppsScreen(
+          targetDevice: extra is Map<String, dynamic> ? extra['targetDevice'] as DiscoveredDevice? : null,
+        );
       },
     ),
 

@@ -193,14 +193,17 @@ class _HomeScreenState extends State<HomeScreen>
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) => SizedBox(
-        width: 190,
-        height: 190,
+        width: 212,
+        height: 212,
         child: Center(
           child: SizedBox(
             width: 154,
             height: 154,
             child: Stack(
               alignment: Alignment.center,
+              // Shortcut icons orbit at a radius past this box's edge — never
+              // clip them, or the outer ones become partly untappable.
+              clipBehavior: Clip.none,
               children: [
             if (_devices.isEmpty) ...[
               _RadarRing(progress: _pulseController.value, size: 154),
